@@ -1,4 +1,4 @@
-Shader "Raymarching/RepeatingSpheres"
+Shader "Raymarching/CutSphereLoop"
 {
 
 Properties
@@ -58,7 +58,22 @@ CGINCLUDE
 // @block DistanceFunction
 inline float DistanceFunction(float3 pos)
 {
-    return Sphere(Repeat(pos, 0.5), 0.1);
+  // sampling independent computations (only depend on shape)
+  float r = 1;
+  float h = 1;
+  float w = sqrt(r*r-h*h);
+//
+    float t = _Time.x;
+   float a = 6 * PI * t;
+    float f = pow(sin(a), 2.0);
+
+  // sampling dependant computations
+  float2 q = float2( length(pos.xz), pos.y );
+  float s = max( (h-r)*q.x*q.x+w*w*(h+r-2.0*q.y), h*q.x-w*q.y );
+  float ans = (s<0.0) ? length(q)-r :
+         (q.x<w) ? h - q.y     :
+                   length(q-float2(w,h));
+  return Repeat(Repeat(ans, 10), lerp(5,10.5,f));
 }
 // @endblock
 

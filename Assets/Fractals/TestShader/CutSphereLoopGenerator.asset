@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3acd6fe57257048db802c1c4c2b75248, type: 3}
-  m_Name: New Generator
+  m_Name: CutSphereLoopGenerator
   m_EditorClassIdentifier: 
-  shaderName: RepeatingSpheres
-  shaderReference: {fileID: 4800000, guid: 6c9e4837a4d86cc4bac3cafde506ade7, type: 3}
+  shaderName: CutSphereLoop
+  shaderReference: {fileID: 4800000, guid: 50ef121c21ff8464a994b12ae5c56443, type: 3}
   shaderTemplate: uRaymarching/Forward/Standard
   variables:
   - key: Name
-    value: RepeatingSpheres
+    value: CutSphereLoop
   - key: LOD
     value: 200
   - key: LightModel
@@ -73,8 +73,14 @@ MonoBehaviour:
     value: // _Color2("Color2", Color) = (1.0, 1.0, 1.0, 1.0)
     folded: 0
   - key: DistanceFunction
-    value: "inline float DistanceFunction(float3 pos)\n{\n    return Sphere(Repeat(pos,
-      0.5), 0.1);\n}"
+    value: "inline float DistanceFunction(float3 pos)\n{\n  // sampling independent
+      computations (only depend on shape)\n  float r = 1;\n  float h = 1;\n  float
+      w = sqrt(r*r-h*h);\n//\n    float t = _Time.x;\n   float a = 6 * PI * t;\n   
+      float f = pow(sin(a), 2.0);\n\n  // sampling dependant computations\n  float2
+      q = float2( length(pos.xz), pos.y );\n  float s = max( (h-r)*q.x*q.x+w*w*(h+r-2.0*q.y),
+      h*q.x-w*q.y );\n  float ans = (s<0.0) ? length(q)-r :\n         (q.x<w) ? h
+      - q.y     :\n                   length(q-float2(w,h));\n  return Repeat(Repeat(ans,
+      10), lerp(5,10.5,f));\n}"
     folded: 1
   - key: PostEffect
     value: 'inline void PostEffect(RaymarchInfo ray, inout PostEffectOutput o)

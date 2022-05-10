@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3acd6fe57257048db802c1c4c2b75248, type: 3}
-  m_Name: New Generator
+  m_Name: InfiniteShperes
   m_EditorClassIdentifier: 
-  shaderName: RepeatingSpheres
-  shaderReference: {fileID: 4800000, guid: 6c9e4837a4d86cc4bac3cafde506ade7, type: 3}
+  shaderName: InfiniteSpheres
+  shaderReference: {fileID: 4800000, guid: 3cfd37ac3ca04274e8de0447eb2c5d41, type: 3}
   shaderTemplate: uRaymarching/Forward/Standard
   variables:
   - key: Name
-    value: RepeatingSpheres
+    value: InfiniteSpheres
   - key: LOD
     value: 200
   - key: LightModel
@@ -31,7 +31,7 @@ MonoBehaviour:
   - key: RenderQueue
     value: Geometry
   - key: ObjectShape
-    value: CUBE
+    value: NONE
   - key: RaymarchingShaderDirectory
     value: Packages/com.hecomi.uraymarching/Runtime/Shaders/Include/Legacy
   conditions:
@@ -44,7 +44,7 @@ MonoBehaviour:
   - key: FullScreen
     value: 0
   - key: WorldSpace
-    value: 0
+    value: 1
   - key: FollowObjectScale
     value: 0
   - key: CameraInsideObject
@@ -74,7 +74,7 @@ MonoBehaviour:
     folded: 0
   - key: DistanceFunction
     value: "inline float DistanceFunction(float3 pos)\n{\n    return Sphere(Repeat(pos,
-      0.5), 0.1);\n}"
+      1), 0.05);\n}"
     folded: 1
   - key: PostEffect
     value: 'inline void PostEffect(RaymarchInfo ray, inout PostEffectOutput o)

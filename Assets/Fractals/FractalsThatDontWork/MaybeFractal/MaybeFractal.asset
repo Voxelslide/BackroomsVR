@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3acd6fe57257048db802c1c4c2b75248, type: 3}
-  m_Name: New Generator
+  m_Name: MaybeFractal
   m_EditorClassIdentifier: 
-  shaderName: RepeatingSpheres
-  shaderReference: {fileID: 4800000, guid: 6c9e4837a4d86cc4bac3cafde506ade7, type: 3}
+  shaderName: MaybeFractal
+  shaderReference: {fileID: 4800000, guid: 9025c9ddcaa1ca94491ba0d4d6d71446, type: 3}
   shaderTemplate: uRaymarching/Forward/Standard
   variables:
   - key: Name
-    value: RepeatingSpheres
+    value: MaybeFractal
   - key: LOD
     value: 200
   - key: LightModel
@@ -46,13 +46,13 @@ MonoBehaviour:
   - key: WorldSpace
     value: 0
   - key: FollowObjectScale
-    value: 0
-  - key: CameraInsideObject
     value: 1
+  - key: CameraInsideObject
+    value: 0
   - key: UseRaymarchingDepth
     value: 1
   - key: UseCameraDepthTexture
-    value: 0
+    value: 1
   - key: DisableViewCulling
     value: 0
   - key: SphericalHarmonicsPerPixel
@@ -70,11 +70,22 @@ MonoBehaviour:
       UnpackNormal(tex2D(_NormalTex, IN.uv_MainTex));\r"
     folded: 0
   - key: Properties
-    value: // _Color2("Color2", Color) = (1.0, 1.0, 1.0, 1.0)
-    folded: 0
+    value: _Color2("Color2", Color) = (1.0, 1.0, 1.0, 1.0)
+    folded: 1
   - key: DistanceFunction
-    value: "inline float DistanceFunction(float3 pos)\n{\n    return Sphere(Repeat(pos,
-      0.5), 0.1);\n}"
+    value: "int Iterations = 50;\nfloat Scale = 10;\nfloat foldingLimit = 20;\nfloat
+      r = 10;\nfloat minRadius2 = 5;\nfloat fixedRadius2 = 10;\n\nvoid boxFold(inout
+      float3 z, inout float dz) {\n\tz = clamp(z, -foldingLimit, foldingLimit) *
+      2.0 - z;\n}\n\nvoid sphereFold(inout float3 z, inout float dz) {\n\tfloat r2
+      = dot(z,z);\n\tif (r<minRadius2) { \n\t\t// linear inner scaling\n\t\tfloat
+      temp = (fixedRadius2/minRadius2);\n\t\tz *= temp;\n\t\tdz*= temp;\n\t} else
+      if (r2<fixedRadius2) { \n\t\t// this is the actual sphere inversion\n\t\tfloat
+      temp =(fixedRadius2/r2);\n\t\tz *= temp;\n\t\tdz*= temp;\n\t}\n}\n\ninline
+      float DistanceFunction(float3 pos)\n{\n\tfloat3 offset = pos;\n\tfloat dr =
+      1.0;\n\tfor (int n = 0; n < Iterations; n++) {\n\t\tboxFold(pos,dr);      
+      // Reflect\n\t\tsphereFold(pos,dr);    // Sphere Inversion\n\t}\n               
+      pos=Scale*pos + offset;  // Scale & Translate\n                dr = dr*abs(Scale)+1.0;\n\tfloat
+      r = length(pos);\n\treturn r/abs(dr);\n}"
     folded: 1
   - key: PostEffect
     value: 'inline void PostEffect(RaymarchInfo ray, inout PostEffectOutput o)
@@ -88,4 +99,4 @@ MonoBehaviour:
   conditionsFolded: 1
   variablesFolded: 1
   materialsFolded: 0
-  constantsFolded: 0
+  constantsFolded: 1

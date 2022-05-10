@@ -1,4 +1,4 @@
-Shader "Raymarching/RepeatingSpheres"
+Shader "Raymarching/mandlebox"
 {
 
 Properties
@@ -43,8 +43,6 @@ CGINCLUDE
 
 #define OBJECT_SHAPE_CUBE
 
-#define CAMERA_INSIDE_OBJECT
-
 #define USE_RAYMARCHING_DEPTH
 
 #define SPHERICAL_HARMONICS_PER_PIXEL
@@ -56,9 +54,47 @@ CGINCLUDE
 #include "Packages/com.hecomi.uraymarching/Runtime/Shaders/Include/Legacy/Common.cginc"
 
 // @block DistanceFunction
+// simply scale the dual vectors
+void sphereFold(inout float3 z, inout _matrix dz) {
+	float r2 = dot(z,z);
+	if (r2 < 0.5) {
+		float temp = (5/0.5);
+		z*= temp; dz*=temp;
+	} else if (r2 < 5) {
+		float temp =(5/r2);
+                dz[0] =temp*(dz[0]-z*2.0*dot(z,dz[0])/r2);
+                dz[1] =temp*(dz[1]-z*2.0*dot(z,dz[1])/r2);
+                dz[2] =temp*(dz[2]-z*2.0*dot(z,dz[2])/r2);
+		z*=temp; dz*=temp;
+	}
+}
+
+// reverse signs for dual vectors when folding
+void boxFold(inout float3 z, inout float3 dz) {
+	if (abs(z.x)>50) { dz[0].x*=-1; dz[1].x*=-1; dz[2].x*=-1; }
+        if (abs(z.y)>50)  { dz[0].y*=-1; dz[1].y*=-1; dz[2].y*=-1; }
+        if (abs(z.z)>50)  { dz[0].z*=-1; dz[1].z*=-1; dz[2].z*=-1; }
+	z = clamp(z, -50, 50) * 2.0 - z;
+}
+
 inline float DistanceFunction(float3 pos)
 {
-    return Sphere(Repeat(pos, 0.5), 0.1);
+        // dz contains our three dual vectors,
+        // initialized to x,y,z directions.
+	mat3 dz = mat3(1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0);
+	
+	vec3 c = z;
+	mat3 dc = dz;
+	for (int n = 0; n < Iterations; n++) {
+		boxFold(z,dz);
+		sphereFold(z,dz);
+		z*=Scale;
+		dz=mat3(dz[0]*Scale,dz[1]*Scale,dz[2]*Scale);
+		z += c*Offset;
+	        dz +=matrixCompMult(mat3(Offset,Offset,Offset),dc);
+		if (length(z)>1000.0) break;
+	}
+	return dot(z,z)/length(z*dz); 
 }
 // @endblock
 

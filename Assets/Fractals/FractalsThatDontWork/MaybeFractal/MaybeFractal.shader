@@ -1,4 +1,4 @@
-Shader "Raymarching/RepeatingSpheres"
+Shader "Raymarching/MaybeFractal"
 {
 
 Properties
@@ -23,7 +23,7 @@ Properties
     [PowerSlider(10.0)] _NormalDelta("NormalDelta", Range(0.00001, 0.1)) = 0.0001
 
 // @block Properties
-// _Color2("Color2", Color) = (1.0, 1.0, 1.0, 1.0)
+_Color2("Color2", Color) = (1.0, 1.0, 1.0, 1.0)
 // @endblock
 }
 
@@ -41,11 +41,13 @@ Cull [_Cull]
 
 CGINCLUDE
 
+#define OBJECT_SCALE
+
 #define OBJECT_SHAPE_CUBE
 
-#define CAMERA_INSIDE_OBJECT
-
 #define USE_RAYMARCHING_DEPTH
+
+#define USE_CAMERA_DEPTH_TEXTURE
 
 #define SPHERICAL_HARMONICS_PER_PIXEL
 
@@ -56,9 +58,44 @@ CGINCLUDE
 #include "Packages/com.hecomi.uraymarching/Runtime/Shaders/Include/Legacy/Common.cginc"
 
 // @block DistanceFunction
+int Iterations = 50;
+float Scale = 10;
+float foldingLimit = 20;
+float r = 10;
+float minRadius2 = 2;
+float fixedRadius2 = 5;
+
+void boxFold(inout float3 z, inout float dz) {
+	z = clamp(z, -foldingLimit, foldingLimit) * 2.0 - z;
+}
+
+void sphereFold(inout float3 z, inout float dz) {
+	float r2 = dot(z,z);
+	if (r<minRadius2) { 
+		// linear inner scaling
+		float temp = (fixedRadius2/minRadius2);
+		z *= temp;
+		dz*= temp;
+	} else if (r2<fixedRadius2) { 
+		// this is the actual sphere inversion
+		float temp =(fixedRadius2/r2);
+		z *= temp;
+		dz*= temp;
+	}
+}
+
 inline float DistanceFunction(float3 pos)
 {
-    return Sphere(Repeat(pos, 0.5), 0.1);
+	float3 offset = pos;
+	float dr = 1.0;
+	for (int n = 0; n < Iterations; n++) {
+		boxFold(pos,dr);       // Reflect
+		sphereFold(pos,dr);    // Sphere Inversion
+	}
+                pos=Scale*pos + offset;  // Scale & Translate
+                dr = dr*abs(Scale)+1.0;
+	float r = length(pos);
+	return r/abs(dr);
 }
 // @endblock
 
