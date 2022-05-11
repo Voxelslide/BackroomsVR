@@ -23,7 +23,7 @@ Properties
     [PowerSlider(10.0)] _NormalDelta("NormalDelta", Range(0.00001, 0.1)) = 0.0001
 
 // @block Properties
-// _Color("Color", Color) = (1.0, 1.0, 1.0, 1.0)
+ _Color("Color", Color) = (1.0, 0.5, 1.0, 1.0)
 // @endblock
 }
 
@@ -40,6 +40,8 @@ Tags
 Cull [_Cull]
 
 CGINCLUDE
+
+#define OBJECT_SCALE
 
 #define OBJECT_SHAPE_CUBE
 
@@ -59,11 +61,11 @@ CGINCLUDE
 inline float DistanceFunction(float3 pos)
 {
     float t = _Time.x;
-   float a = 6 * PI * t;
+    float a = 6 * PI * t;
     float s = pow(sin(a), 2.0);
-    float d1 = Sphere(pos, 0.75);
+    float d1 = Sphere(pos, 0.2);
     float d2 = RoundBox(
-        Repeat(pos, 0.2),
+        Repeat(pos, 0.3),
         0.1 - 0.1 * s,
         0.1 / length(pos * 2.0));
     return lerp(d1, d2, s);

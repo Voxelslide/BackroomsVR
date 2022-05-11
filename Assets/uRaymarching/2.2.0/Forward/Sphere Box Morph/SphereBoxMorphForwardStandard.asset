@@ -50,7 +50,7 @@ MonoBehaviour:
   - key: WorldSpace
     value: 0
   - key: FollowObjectScale
-    value: 0
+    value: 1
   - key: SphericalHarmonicsPerPixel
     value: 1
   - key: CameraInsideObject
@@ -73,18 +73,18 @@ MonoBehaviour:
     value: 0
   blocks:
   - key: Properties
-    value: // _Color("Color", Color) = (1.0, 1.0, 1.0, 1.0)
+    value: // _Color("Color", Color) = (1.0, 0.5, 1.0, 1.0)
     folded: 0
   - key: DistanceFunction
-    value: "inline float DistanceFunction(float3 pos)\n{\n    float t = _Time.x;\n  
+    value: "inline float DistanceFunction(float3 pos)\n{\n    float t = _Time.x;\n   
       float a = 6 * PI * t;\n    float s = pow(sin(a), 2.0);\n    float d1 = Sphere(pos,
-      0.75);\n    float d2 = RoundBox(\n        Repeat(pos, 0.2),\n        0.1 -
-      0.1 * s,\n        0.1 / length(pos * 2.0));\n    return lerp(d1, d2, s);\n}"
-    folded: 0
+      0.2);\n    float d2 = RoundBox(\n        Repeat(pos, 0.3),\n        0.1 - 0.1
+      * s,\n        0.1 / length(pos * 2.0));\n    return lerp(d1, d2, s);\n}"
+    folded: 1
   - key: PostEffect
     value: "inline void PostEffect(RaymarchInfo ray, inout PostEffectOutput o)\n{\n  
       o.Occlusion *= pow(1.0 - 1.0 * ray.loop / ray.maxLoop, 2.0);\n}"
-    folded: 0
+    folded: 1
   - key: SurfaceFunction
     value: 'fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
 
@@ -112,5 +112,5 @@ MonoBehaviour:
   basicFolded: 1
   conditionsFolded: 1
   variablesFolded: 1
-  materialsFolded: 0
+  materialsFolded: 1
   constantsFolded: 1
