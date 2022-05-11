@@ -58,7 +58,7 @@ CGINCLUDE
 // @block DistanceFunction
 inline float DistanceFunction(float3 pos)
 {
-    return Sphere(Repeat(pos, 0.5), 0.1);
+    return Sphere(Repeat(pos, 3), 1);
 }
 // @endblock
 

@@ -71,10 +71,10 @@ MonoBehaviour:
     folded: 0
   - key: Properties
     value: // _Color2("Color2", Color) = (1.0, 1.0, 1.0, 1.0)
-    folded: 0
+    folded: 1
   - key: DistanceFunction
     value: "inline float DistanceFunction(float3 pos)\n{\n    return Sphere(Repeat(pos,
-      0.5), 0.1);\n}"
+      3), 1);\n}"
     folded: 1
   - key: PostEffect
     value: 'inline void PostEffect(RaymarchInfo ray, inout PostEffectOutput o)
