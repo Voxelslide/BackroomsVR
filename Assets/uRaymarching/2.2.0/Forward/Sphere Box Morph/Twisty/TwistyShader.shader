@@ -1,4 +1,4 @@
-Shader "Raymarching/TestShader"
+Shader "Raymarching/TwistyShader"
 {
 
 Properties
@@ -10,16 +10,15 @@ Properties
 
     [Header(Pass)]
     [Enum(UnityEngine.Rendering.CullMode)] _Cull("Culling", Int) = 2
-
+    [Enum(UnityEngine.Rendering.BlendMode)] _BlendSrc("Blend Src", Float) = 5 
+    [Enum(UnityEngine.Rendering.BlendMode)] _BlendDst("Blend Dst", Float) = 10
     [Toggle][KeyEnum(Off, On)] _ZWrite("ZWrite", Float) = 1
 
     [Header(Raymarching)]
     _Loop("Loop", Range(1, 100)) = 30
     _MinDistance("Minimum Distance", Range(0.001, 0.1)) = 0.01
     _DistanceMultiplier("Distance Multiplier", Range(0.001, 2.0)) = 1.0
-    _ShadowLoop("Shadow Loop", Range(1, 100)) = 30
-    _ShadowMinDistance("Shadow Minimum Distance", Range(0.001, 0.1)) = 0.01
-    _ShadowExtraBias("Shadow Extra Bias", Range(0.0, 0.1)) = 0.0
+
     [PowerSlider(10.0)] _NormalDelta("NormalDelta", Range(0.00001, 0.1)) = 0.0001
 
 // @block Properties
@@ -41,6 +40,8 @@ Cull [_Cull]
 
 CGINCLUDE
 
+#define OBJECT_SCALE
+
 #define OBJECT_SHAPE_CUBE
 
 #define CAMERA_INSIDE_OBJECT
@@ -56,25 +57,46 @@ CGINCLUDE
 #include "Packages/com.hecomi.uraymarching/Runtime/Shaders/Include/Legacy/Common.cginc"
 
 // @block DistanceFunction
-float DeathStar(float3 p2, float ra, float rb, float d )
+float3 twistY(float3 p, float power)
 {
-    // sampling independent computations (only depend on shape)
-    float a = (ra*ra - rb*rb + d*d)/(2.0*d);
-    float b = sqrt(max(ra*ra-a*a,0.0));
-  	
-    // sampling dependant computations
-    float2 p = float2( p2.y, length(p2.xz) );
-    if(p.x*b - p.y*a > d*max(b-p.y,0.0) )
-      return length(p-float2(a,b));
-    else
-      return max( (length(p          )-ra),
-               -(length(p-float2(d,0))-rb));
+    float s = sin(power * p.y);
+    float c = cos(power * p.y);
+    float3x3 m = float3x3(
+          c, 0.0,  -s,
+        0.0, 1.0, 0.0,
+          s, 0.0,   c
+    );
+    return mul(m, p);
+}
+float3 rotate(float3 p, float angle, float3 axis)
+{
+    float3 a = normalize(axis);
+    float s = sin(angle);
+    float c = cos(angle);
+    float r = 1.0 - c;
+    float3x3 m = float3x3(
+        a.x * a.x * r + c,
+        a.y * a.x * r + a.z * s,
+        a.z * a.x * r - a.y * s,
+        a.x * a.y * r - a.z * s,
+        a.y * a.y * r + c,
+        a.z * a.y * r + a.x * s,
+        a.x * a.z * r + a.y * s,
+        a.y * a.z * r - a.x * s,
+        a.z * a.z * r + c
+    );
+    return mul(m, p);
+}
+float sdTorus( float3 p, float2 t )
+{
+    float2 q = float2(length(p.yz)-t.x,p.x);
+    return length(q)-t.y;
 }
 inline float DistanceFunction(float3 pos)
 {
- float t = _Time.x;
- float r = abs(sin(6*PI*t))/3;
- return DeathStar(pos, 0.1, r, 0.23);
+    float t = _Time.x*20;
+    float3 axis = float3(0, 1, 0);
+    return sdTorus(rotate(twistY(pos, 10), t, axis),  float2(0.2, 0.05));
 }
 // @endblock
 
@@ -89,7 +111,7 @@ ENDCG
 Pass
 {
     Tags { "LightMode" = "ForwardBase" }
-
+    Blend [_BlendSrc] [_BlendDst]
     ZWrite [_ZWrite]
 
     CGPROGRAM
@@ -121,23 +143,9 @@ Pass
     ENDCG
 }
 
-Pass
-{
-    Tags { "LightMode" = "ShadowCaster" }
-
-    CGPROGRAM
-    #include "Packages/com.hecomi.uraymarching/Runtime/Shaders/Include/Legacy/ShadowCaster.cginc"
-    #pragma target 3.0
-    #pragma vertex Vert
-    #pragma fragment Frag
-    #pragma fragmentoption ARB_precision_hint_fastest
-    #pragma multi_compile_shadowcaster
-    ENDCG
 }
 
-}
-
-Fallback "Raymarching/Fallbacks/StandardSurfaceShader"
+Fallback Off
 
 CustomEditor "uShaderTemplate.MaterialEditor"
 
