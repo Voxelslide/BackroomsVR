@@ -1,0 +1,104 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3acd6fe57257048db802c1c4c2b75248, type: 3}
+  m_Name: Mandlebox
+  m_EditorClassIdentifier: 
+  shaderName: mandlebox
+  shaderReference: {fileID: 4800000, guid: 5f1f97a2ee5328746898604fa2bde9fa, type: 3}
+  shaderTemplate: uRaymarching/Forward/Standard
+  variables:
+  - key: Name
+    value: mandlebox
+  - key: LOD
+    value: 200
+  - key: LightModel
+    value: Standard
+  - key: Option
+    value: 
+  - key: SurfaceFunctionInput
+    value: SurfaceOutputStandard
+  - key: RenderType
+    value: Opaque
+  - key: RenderQueue
+    value: Geometry
+  - key: ObjectShape
+    value: CUBE
+  - key: RaymarchingShaderDirectory
+    value: Packages/com.hecomi.uraymarching/Runtime/Shaders/Include/Legacy
+  conditions:
+  - key: UseTesselation
+    value: 0
+  - key: Blend
+    value: 0
+  - key: ShadowCaster
+    value: 1
+  - key: FullScreen
+    value: 0
+  - key: WorldSpace
+    value: 0
+  - key: FollowObjectScale
+    value: 0
+  - key: CameraInsideObject
+    value: 0
+  - key: UseRaymarchingDepth
+    value: 1
+  - key: UseCameraDepthTexture
+    value: 0
+  - key: DisableViewCulling
+    value: 0
+  - key: SphericalHarmonicsPerPixel
+    value: 1
+  - key: UseGrabPass
+    value: 0
+  - key: ForwardAdd
+    value: 1
+  - key: FallbackToStandardShader
+    value: 1
+  blocks:
+  - key: SurfaceFunction
+    value: "fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;\r\no.Albedo = c.rgb;\r\no.Metallic
+      = _Metallic;\r\no.Smoothness = _Glossiness;\r\no.Alpha = c.a;\r\no.Normal =
+      UnpackNormal(tex2D(_NormalTex, IN.uv_MainTex));\r"
+    folded: 0
+  - key: Properties
+    value: // _Color2("Color2", Color) = (1.0, 1.0, 1.0, 1.0)
+    folded: 0
+  - key: DistanceFunction
+    value: "// simply scale the dual vectors\nvoid sphereFold(inout float3 z, inout
+      _matrix dz) {\n\tfloat r2 = dot(z,z);\n\tif (r2 < 0.5) {\n\t\tfloat temp =
+      (5/0.5);\n\t\tz*= temp; dz*=temp;\n\t} else if (r2 < 5) {\n\t\tfloat temp =(5/r2);\n               
+      dz[0] =temp*(dz[0]-z*2.0*dot(z,dz[0])/r2);\n                dz[1] =temp*(dz[1]-z*2.0*dot(z,dz[1])/r2);\n               
+      dz[2] =temp*(dz[2]-z*2.0*dot(z,dz[2])/r2);\n\t\tz*=temp; dz*=temp;\n\t}\n}\n\n//
+      reverse signs for dual vectors when folding\nvoid boxFold(inout float3 z, inout
+      float3 dz) {\n\tif (abs(z.x)>50) { dz[0].x*=-1; dz[1].x*=-1; dz[2].x*=-1; }\n       
+      if (abs(z.y)>50)  { dz[0].y*=-1; dz[1].y*=-1; dz[2].y*=-1; }\n        if (abs(z.z)>50) 
+      { dz[0].z*=-1; dz[1].z*=-1; dz[2].z*=-1; }\n\tz = clamp(z, -50, 50) * 2.0 -
+      z;\n}\n\ninline float DistanceFunction(float3 pos)\n{\n        // dz contains
+      our three dual vectors,\n        // initialized to x,y,z directions.\n\tmat3
+      dz = mat3(1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0);\n\t\n\tvec3 c = z;\n\tmat3
+      dc = dz;\n\tfor (int n = 0; n < Iterations; n++) {\n\t\tboxFold(z,dz);\n\t\tsphereFold(z,dz);\n\t\tz*=Scale;\n\t\tdz=mat3(dz[0]*Scale,dz[1]*Scale,dz[2]*Scale);\n\t\tz
+      += c*Offset;\n\t        dz +=matrixCompMult(mat3(Offset,Offset,Offset),dc);\n\t\tif
+      (length(z)>1000.0) break;\n\t}\n\treturn dot(z,z)/length(z*dz); \n}"
+    folded: 1
+  - key: PostEffect
+    value: 'inline void PostEffect(RaymarchInfo ray, inout PostEffectOutput o)
+
+      {
+
+      }'
+    folded: 0
+  constants: {fileID: 11400000, guid: 9c8b2f5a7a56c4e21bee7ca4ccfc6640, type: 2}
+  basicFolded: 1
+  conditionsFolded: 0
+  variablesFolded: 1
+  materialsFolded: 0
+  constantsFolded: 0
