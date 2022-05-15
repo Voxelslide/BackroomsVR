@@ -1,4 +1,4 @@
-Shader "Raymarching/InfiniteSpheres"
+Shader "Raymarching/InifiniteShader"
 {
 
 Properties
@@ -41,9 +41,7 @@ Cull [_Cull]
 
 CGINCLUDE
 
-#define WORLD_SPACE
-
-#define OBJECT_SHAPE_NONE
+#define OBJECT_SHAPE_CUBE
 
 #define CAMERA_INSIDE_OBJECT
 
@@ -58,7 +56,7 @@ CGINCLUDE
 // @block DistanceFunction
 inline float DistanceFunction(float3 pos)
 {
-    return Sphere(Repeat(pos, 1), 0.05);
+    return Sphere(Repeat(pos, 0.01), 0.001);
 }
 // @endblock
 

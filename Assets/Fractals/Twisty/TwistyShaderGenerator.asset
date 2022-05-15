@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3acd6fe57257048db802c1c4c2b75248, type: 3}
-  m_Name: TestShaderGenerator
+  m_Name: TwistyShaderGenerator
   m_EditorClassIdentifier: 
-  shaderName: TestShader
-  shaderReference: {fileID: 4800000, guid: 0977986aa0a4c22468e5c391ed0eefbc, type: 3}
+  shaderName: TwistyShader
+  shaderReference: {fileID: 4800000, guid: 5dbe178f0d02a0b498a0d727ee86b8a3, type: 3}
   shaderTemplate: uRaymarching/Forward/Standard
   variables:
   - key: Name
-    value: TestShader
+    value: TwistyShader
   - key: LOD
     value: 200
   - key: LightModel
@@ -38,9 +38,9 @@ MonoBehaviour:
   - key: UseTesselation
     value: 0
   - key: Blend
-    value: 0
-  - key: ShadowCaster
     value: 1
+  - key: ShadowCaster
+    value: 0
   - key: FullScreen
     value: 0
   - key: WorldSpace
@@ -62,7 +62,7 @@ MonoBehaviour:
   - key: ForwardAdd
     value: 1
   - key: FallbackToStandardShader
-    value: 1
+    value: 0
   blocks:
   - key: SurfaceFunction
     value: "fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;\r\no.Albedo = c.rgb;\r\no.Metallic
@@ -73,15 +73,21 @@ MonoBehaviour:
     value: // _Color2("Color2", Color) = (1.0, 1.0, 1.0, 1.0)
     folded: 0
   - key: DistanceFunction
-    value: "float DeathStar(float3 p2, float ra, float rb, float d )\n{\n    // sampling
-      independent computations (only depend on shape)\n    float a = (ra*ra - rb*rb
-      + d*d)/(2.0*d);\n    float b = sqrt(max(ra*ra-a*a,0.0));\n  \t\n    // sampling
-      dependant computations\n    float2 p = float2( p2.y, length(p2.xz) );\n   
-      if(p.x*b - p.y*a > d*max(b-p.y,0.0) )\n      return length(p-float2(a,b));\n   
-      else\n      return max( (length(p          )-ra),\n               -(length(p-float2(d,0))-rb));\n}\ninline
-      float DistanceFunction(float3 pos)\n{\n float t = _Time.x;\n float r = abs(sin(6*PI*t))/3;\n
-      return DeathStar(pos, 0.1, r, 0.23);\n}"
-    folded: 1
+    value: "float3 twistY(float3 p, float power)\n{\n    float s = sin(power * p.y);\n   
+      float c = cos(power * p.y);\n    float3x3 m = float3x3(\n          c, 0.0, 
+      -s,\n        0.0, 1.0, 0.0,\n          s, 0.0,   c\n    );\n    return mul(m,
+      p);\n}\nfloat3 rotate(float3 p, float angle, float3 axis)\n{\n    float3 a
+      = normalize(axis);\n    float s = sin(angle);\n    float c = cos(angle);\n   
+      float r = 1.0 - c;\n    float3x3 m = float3x3(\n        a.x * a.x * r + c,\n       
+      a.y * a.x * r + a.z * s,\n        a.z * a.x * r - a.y * s,\n        a.x * a.y
+      * r - a.z * s,\n        a.y * a.y * r + c,\n        a.z * a.y * r + a.x * s,\n       
+      a.x * a.z * r + a.y * s,\n        a.y * a.z * r - a.x * s,\n        a.z * a.z
+      * r + c\n    );\n    return mul(m, p);\n}\nfloat sdTorus( float3 p, float2
+      t )\n{\n    float2 q = float2(length(p.yz)-t.x,p.x);\n    return length(q)-t.y;\n}\ninline
+      float DistanceFunction(float3 pos)\n{\n    float t = _Time.x*20;\n    float3
+      axis = float3(0, 1, 0);\n    return sdTorus(rotate(twistY(pos, 20), t, axis), 
+      float2(0.1, 0.02));\n}"
+    folded: 0
   - key: PostEffect
     value: 'inline void PostEffect(RaymarchInfo ray, inout PostEffectOutput o)
 
@@ -91,7 +97,7 @@ MonoBehaviour:
     folded: 0
   constants: {fileID: 11400000, guid: 9c8b2f5a7a56c4e21bee7ca4ccfc6640, type: 2}
   basicFolded: 1
-  conditionsFolded: 1
-  variablesFolded: 1
-  materialsFolded: 0
+  conditionsFolded: 0
+  variablesFolded: 0
+  materialsFolded: 1
   constantsFolded: 0

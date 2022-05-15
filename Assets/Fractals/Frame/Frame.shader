@@ -1,4 +1,4 @@
-Shader "Raymarching/InfiniteSpheres"
+Shader "Raymarching/Frame"
 {
 
 Properties
@@ -41,13 +41,11 @@ Cull [_Cull]
 
 CGINCLUDE
 
-#define WORLD_SPACE
-
-#define OBJECT_SHAPE_NONE
-
-#define CAMERA_INSIDE_OBJECT
+#define OBJECT_SHAPE_CUBE
 
 #define USE_RAYMARCHING_DEPTH
+
+#define SPHERICAL_HARMONICS_PER_PIXEL
 
 #define DISTANCE_FUNCTION DistanceFunction
 #define PostEffectOutput SurfaceOutputStandard
@@ -56,9 +54,20 @@ CGINCLUDE
 #include "Packages/com.hecomi.uraymarching/Runtime/Shaders/Include/Legacy/Common.cginc"
 
 // @block DistanceFunction
+float sdBoxFrame( float3 p, float3 b, float e )
+{
+       p = abs(p  )-b;
+       float3 q = abs(p+e)-e;
+       return min(min(
+      length(max(float3(p.x,q.y,q.z),0.0))+min(max(p.x,max(q.y,q.z)),0.0),
+      length(max(float3(q.x,p.y,q.z),0.0))+min(max(q.x,max(p.y,q.z)),0.0)),
+      length(max(float3(q.x,q.y,p.z),0.0))+min(max(q.x,max(q.y,p.z)),0.0));
+}
+
 inline float DistanceFunction(float3 pos)
 {
-    return Sphere(Repeat(pos, 1), 0.05);
+    float size = _Time;
+    return Repeat(sdBoxFrame(pos, float3(size, size, size), 0.3), 0.03);
 }
 // @endblock
 
@@ -89,6 +98,24 @@ Pass
 
 Pass
 {
+    Tags { "LightMode" = "ForwardAdd" }
+    ZWrite Off 
+    Blend One One
+
+    CGPROGRAM
+    #include "Packages/com.hecomi.uraymarching/Runtime/Shaders/Include/Legacy/ForwardAddStandard.cginc"
+    #pragma target 3.0
+    #pragma vertex Vert
+    #pragma fragment Frag
+    #pragma multi_compile_instancing
+    #pragma multi_compile_fog
+    #pragma skip_variants INSTANCING_ON
+    #pragma multi_compile_fwdadd_fullshadows
+    ENDCG
+}
+
+Pass
+{
     Tags { "LightMode" = "ShadowCaster" }
 
     CGPROGRAM
@@ -103,7 +130,7 @@ Pass
 
 }
 
-Fallback Off
+Fallback "Raymarching/Fallbacks/StandardSurfaceShader"
 
 CustomEditor "uShaderTemplate.MaterialEditor"
 

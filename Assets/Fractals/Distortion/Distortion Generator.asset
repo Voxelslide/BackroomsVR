@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3acd6fe57257048db802c1c4c2b75248, type: 3}
-  m_Name: InfiniteShperes
+  m_Name: Distortion Generator
   m_EditorClassIdentifier: 
-  shaderName: InfiniteSpheres
-  shaderReference: {fileID: 4800000, guid: 3cfd37ac3ca04274e8de0447eb2c5d41, type: 3}
+  shaderName: Distortion
+  shaderReference: {fileID: 4800000, guid: 7851686559b4ff641b71fbeb9575381c, type: 3}
   shaderTemplate: uRaymarching/Forward/Standard
   variables:
   - key: Name
-    value: InfiniteSpheres
+    value: Distortion
   - key: LOD
     value: 200
   - key: LightModel
@@ -31,20 +31,20 @@ MonoBehaviour:
   - key: RenderQueue
     value: Geometry
   - key: ObjectShape
-    value: NONE
+    value: CUBE
   - key: RaymarchingShaderDirectory
     value: Packages/com.hecomi.uraymarching/Runtime/Shaders/Include/Legacy
   conditions:
   - key: UseTesselation
     value: 0
   - key: Blend
-    value: 0
+    value: 1
   - key: ShadowCaster
     value: 1
   - key: FullScreen
     value: 0
   - key: WorldSpace
-    value: 1
+    value: 0
   - key: FollowObjectScale
     value: 0
   - key: CameraInsideObject
@@ -71,10 +71,12 @@ MonoBehaviour:
     folded: 0
   - key: Properties
     value: // _Color2("Color2", Color) = (1.0, 1.0, 1.0, 1.0)
-    folded: 1
+    folded: 0
   - key: DistanceFunction
-    value: "inline float DistanceFunction(float3 pos)\n{\n    return Sphere(Repeat(pos,
-      1), 0.05);\n}"
+    value: "inline float displacement(float3 p, float k)\n{\n    return p.x/p.y +
+      p.z/p.x;\n}\n\ninline float DistanceFunction(float3 pos)\n{\n    float t =
+      _Time;\n    float s = sin(t*10)*0.01;\n    float d1 = Sphere(pos, 0.05);\n   
+      float d2 = displacement(pos, s);\n    return d1 + d2*s;\n}"
     folded: 1
   - key: PostEffect
     value: 'inline void PostEffect(RaymarchInfo ray, inout PostEffectOutput o)
@@ -87,5 +89,5 @@ MonoBehaviour:
   basicFolded: 1
   conditionsFolded: 1
   variablesFolded: 1
-  materialsFolded: 1
-  constantsFolded: 1
+  materialsFolded: 0
+  constantsFolded: 0

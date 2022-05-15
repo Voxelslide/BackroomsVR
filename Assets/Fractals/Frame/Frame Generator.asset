@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3acd6fe57257048db802c1c4c2b75248, type: 3}
-  m_Name: TwistyShaderGenerator
+  m_Name: Frame Generator
   m_EditorClassIdentifier: 
-  shaderName: TwistyShader
-  shaderReference: {fileID: 4800000, guid: 5dbe178f0d02a0b498a0d727ee86b8a3, type: 3}
+  shaderName: Frame
+  shaderReference: {fileID: 4800000, guid: 45500f804494f8c4382d58d0ee926f84, type: 3}
   shaderTemplate: uRaymarching/Forward/Standard
   variables:
   - key: Name
-    value: TwistyShader
+    value: Frame
   - key: LOD
     value: 200
   - key: LightModel
@@ -46,9 +46,9 @@ MonoBehaviour:
   - key: WorldSpace
     value: 0
   - key: FollowObjectScale
-    value: 1
+    value: 0
   - key: CameraInsideObject
-    value: 1
+    value: 0
   - key: UseRaymarchingDepth
     value: 1
   - key: UseCameraDepthTexture
@@ -62,7 +62,7 @@ MonoBehaviour:
   - key: ForwardAdd
     value: 1
   - key: FallbackToStandardShader
-    value: 0
+    value: 1
   blocks:
   - key: SurfaceFunction
     value: "fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;\r\no.Albedo = c.rgb;\r\no.Metallic
@@ -73,20 +73,12 @@ MonoBehaviour:
     value: // _Color2("Color2", Color) = (1.0, 1.0, 1.0, 1.0)
     folded: 0
   - key: DistanceFunction
-    value: "float3 twistY(float3 p, float power)\n{\n    float s = sin(power * p.y);\n   
-      float c = cos(power * p.y);\n    float3x3 m = float3x3(\n          c, 0.0, 
-      -s,\n        0.0, 1.0, 0.0,\n          s, 0.0,   c\n    );\n    return mul(m,
-      p);\n}\nfloat3 rotate(float3 p, float angle, float3 axis)\n{\n    float3 a
-      = normalize(axis);\n    float s = sin(angle);\n    float c = cos(angle);\n   
-      float r = 1.0 - c;\n    float3x3 m = float3x3(\n        a.x * a.x * r + c,\n       
-      a.y * a.x * r + a.z * s,\n        a.z * a.x * r - a.y * s,\n        a.x * a.y
-      * r - a.z * s,\n        a.y * a.y * r + c,\n        a.z * a.y * r + a.x * s,\n       
-      a.x * a.z * r + a.y * s,\n        a.y * a.z * r - a.x * s,\n        a.z * a.z
-      * r + c\n    );\n    return mul(m, p);\n}\nfloat sdTorus( float3 p, float2
-      t )\n{\n    float2 q = float2(length(p.yz)-t.x,p.x);\n    return length(q)-t.y;\n}\ninline
-      float DistanceFunction(float3 pos)\n{\n    float t = _Time.x*20;\n    float3
-      axis = float3(0, 1, 0);\n    return sdTorus(rotate(twistY(pos, 10), t, axis), 
-      float2(0.2, 0.05));\n}"
+    value: "float sdBoxFrame( float3 p, float3 b, float e )\n{\n       p = abs(p 
+      )-b;\n       float3 q = abs(p+e)-e;\n       return min(min(\n      length(max(float3(p.x,q.y,q.z),0.0))+min(max(p.x,max(q.y,q.z)),0.0),\n     
+      length(max(float3(q.x,p.y,q.z),0.0))+min(max(q.x,max(p.y,q.z)),0.0)),\n     
+      length(max(float3(q.x,q.y,p.z),0.0))+min(max(q.x,max(q.y,p.z)),0.0));\n}\n\ninline
+      float DistanceFunction(float3 pos)\n{\n    float size = _Time;\n    return
+      Repeat(sdBoxFrame(pos, float3(size, size, size), 0.3), 0.03);\n}"
     folded: 1
   - key: PostEffect
     value: 'inline void PostEffect(RaymarchInfo ray, inout PostEffectOutput o)
@@ -97,7 +89,7 @@ MonoBehaviour:
     folded: 0
   constants: {fileID: 11400000, guid: 9c8b2f5a7a56c4e21bee7ca4ccfc6640, type: 2}
   basicFolded: 1
-  conditionsFolded: 1
-  variablesFolded: 1
+  conditionsFolded: 0
+  variablesFolded: 0
   materialsFolded: 1
   constantsFolded: 0
