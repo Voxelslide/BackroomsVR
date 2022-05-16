@@ -8,9 +8,12 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/MorganScene2.unity
     guid: 50be117b038ca5548a8a72cb0bab4c04
+  - enabled: 1
+    path: Assets/Scenes/MuseumMain.unity
+    guid: 4a1904ee78fa0be4eaf3c2e58d690ae7
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: bfa1182bd221b4ca89619141f66f1260,
       type: 2}
