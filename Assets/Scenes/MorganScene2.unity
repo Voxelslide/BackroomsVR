@@ -1868,9 +1868,9 @@ GameObject:
   - component: {fileID: 1696935025}
   - component: {fileID: 1696935024}
   - component: {fileID: 1696935023}
-  - component: {fileID: 1696935022}
   - component: {fileID: 1696935027}
   - component: {fileID: 1696935026}
+  - component: {fileID: 1696935022}
   m_Layer: 0
   m_Name: Frame Cube
   m_TagString: Untagged
@@ -1996,10 +1996,34 @@ MonoBehaviour:
       m_Calls: []
   m_SelectEntered:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1696935027}
+        m_TargetAssemblyTypeName: UnityEngine.Rigidbody, UnityEngine
+        m_MethodName: set_detectCollisions
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_SelectExited:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1696935027}
+        m_TargetAssemblyTypeName: UnityEngine.Rigidbody, UnityEngine
+        m_MethodName: set_detectCollisions
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
   m_Activated:
     m_PersistentCalls:
       m_Calls: []
@@ -2250,6 +2274,21 @@ PrefabInstance:
         type: 3}
       propertyPath: m_InteractionManager
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 7102886049103027614, guid: bdc6ec2c17a3e1346822043388a60a9b,
+        type: 3}
+      propertyPath: m_Drag
+      value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: 7102886049103027614, guid: bdc6ec2c17a3e1346822043388a60a9b,
+        type: 3}
+      propertyPath: m_Mass
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7102886049103027614, guid: bdc6ec2c17a3e1346822043388a60a9b,
+        type: 3}
+      propertyPath: m_IsKinematic
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 3413293478697178197, guid: bdc6ec2c17a3e1346822043388a60a9b, type: 3}
